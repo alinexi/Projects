@@ -1,10 +1,20 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, TextAreaField, SubmitField
+from wtforms import StringField, PasswordField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
 class TaxRecordForm(FlaskForm):
-    user_id = StringField('User ID', validators=[DataRequired()])
-    encrypted_record = TextAreaField('Encrypted Record', validators=[DataRequired()])
+    full_name = StringField('Full Name', validators=[DataRequired()])
+    tax_id = StringField('Tax ID', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
+    postal_code = StringField('Postal Code', validators=[DataRequired()])
+    annual_income = StringField('Annual Income', validators=[DataRequired()])
+    income_sources = StringField('Income Sources', validators=[DataRequired()])
+    deductions = StringField('Deductions', validators=[DataRequired()])
+    deduction_details = StringField('Deduction Details', validators=[DataRequired()])
+    tax_rate = StringField('Tax Rate (%)', validators=[DataRequired()])
+    calculated_tax = StringField('Calculated Tax', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 class UserForm(FlaskForm):

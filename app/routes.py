@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
-from app.models import User, TaxRecord, Invoice
+from app.models import User
 from app.forms import TaxRecordForm, UserForm
 
 @app.route('/')
@@ -58,7 +58,7 @@ def edit_user(user_id):
         return redirect(url_for('sysadmin_dashboard'))
     return render_template('edit_user.html', form=form, user_id=user_id)
 
-@app.route('/delete_user/<int=user_id>', methods=['POST'])
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
@@ -66,26 +66,26 @@ def delete_user(user_id):
     flash('User deleted successfully!', 'success')
     return redirect(url_for('sysadmin_dashboard'))
 
-@app.route('/staff_dashboard', methods=['GET', 'POST'])
-def staff_dashboard():
+@app.route('/user_dashboard', methods=['GET', 'POST'])
+def user_dashboard():
     form = TaxRecordForm()
     if form.validate_on_submit():
-        # Process form data and save to database
-        tax_record = TaxRecord(
-            user_id=form.user_id.data,
-            encrypted_record=form.encrypted_record.data
-        )
-        db.session.add(tax_record)
-        db.session.commit()
+        full_name = form.full_name.data
+        tax_id = form.tax_id.data
+        address = form.address.data
+        city = form.city.data
+        state = form.state.data
+        postal_code = form.postal_code.data
+        annual_income = form.annual_income.data
+        income_sources = form.income_sources.data
+        deductions = form.deductions.data
+        deduction_details = form.deduction_details.data
+        tax_rate = form.tax_rate.data
+        calculated_tax = form.calculated_tax.data
+        # Here you can add logic to save the data to the database
         flash('Tax record updated successfully!', 'success')
-        return redirect(url_for('staff_dashboard'))
-    return render_template('staff_dashboard.html', form=form)
-
-@app.route('/user_dashboard')
-def user_dashboard():
-    user_id = request.args.get('user_id')
-    invoices = Invoice.query.filter_by(user_id=user_id).all()
-    return render_template('user_dashboard.html', invoices=invoices)
+        return redirect(url_for('user_dashboard'))
+    return render_template('user_dashboard.html', form=form)
 
 @app.route('/logout')
 def logout():
