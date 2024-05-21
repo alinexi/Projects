@@ -1,0 +1,22 @@
+<!-- app/templates/user_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>User Dashboard</h1>
+        <h2>Invoices</h2>
+        <ul>
+            {% for invoice in invoices %}
+                <li>{{ invoice.id }} - {{ invoice.encrypted_invoice }} - {{ invoice.signature }}</li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!-- app/templates/staff_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Staff Dashboard</h1>
+        <form method="POST" action="{{ url_for('staff_dashboard') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.user_id.label }}
+                {{ form.user_id(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.encrypted_record.label }}
+                {{ form.encrypted_record(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</body>
+</html>
