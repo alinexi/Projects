@@ -18,6 +18,8 @@ class Invoice(db.Model):
     encrypted_invoice = db.Column(db.LargeBinary, nullable=False)
     signature = db.Column(db.LargeBinary, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    amount_due = db.Column(db.Float, nullable=False)  # Added field for amount due
+
 
 class Key(db.Model):
     id = db.Column(db.Integer, primary_key=True)
