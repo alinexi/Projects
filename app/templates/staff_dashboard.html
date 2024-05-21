@@ -1,27 +1,71 @@
-<!-- app/templates/staff_dashboard.html -->
+<!-- app/templates/user_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Dashboard</title>
+    <title>User Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Staff Dashboard</h1>
-        <form method="POST" action="{{ url_for('staff_dashboard') }}">
+        <h1>Welcome, User!</h1>
+        <p>This is the user dashboard.</p>
+        
+        <!-- Form to update tax record details -->
+        <form method="POST" action="{{ url_for('user_dashboard') }}">
             {{ form.hidden_tag() }}
             <div class="form-group">
-                {{ form.user_id.label }}
-                {{ form.user_id(class="form-control") }}
+                {{ form.full_name.label }}
+                {{ form.full_name(class="form-control") }}
             </div>
             <div class="form-group">
-                {{ form.encrypted_record.label }}
-                {{ form.encrypted_record(class="form-control") }}
+                {{ form.tax_id.label }}
+                {{ form.tax_id(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.address.label }}
+                {{ form.address(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.city.label }}
+                {{ form.city(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.state.label }}
+                {{ form.state(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.postal_code.label }}
+                {{ form.postal_code(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.annual_income.label }}
+                {{ form.annual_income(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.income_sources.label }}
+                {{ form.income_sources(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.deductions.label }}
+                {{ form.deductions(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.deduction_details.label }}
+                {{ form.deduction_details(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.tax_rate.label }}
+                {{ form.tax_rate(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.calculated_tax.label }}
+                {{ form.calculated_tax(class="form-control") }}
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
+
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 </body>

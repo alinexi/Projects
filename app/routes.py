@@ -87,6 +87,21 @@ def user_dashboard():
         return redirect(url_for('user_dashboard'))
     return render_template('user_dashboard.html', form=form)
 
+@app.route('/staff_dashboard', methods=['GET', 'POST'])
+def staff_dashboard():
+    form = TaxRecordForm()
+    if form.validate_on_submit():
+        # Process form data and save to database
+        tax_record = TaxRecord(
+            tax_id=form.tax_id.data,
+            encrypted_record=form.encrypted_record.data
+        )
+        db.session.add(tax_record)
+        db.session.commit()
+        flash('Tax record updated successfully!', 'success')
+        return redirect(url_for('staff_dashboard'))
+    return render_template('staff_dashboard.html', form=form)
+
 @app.route('/logout')
 def logout():
     return redirect(url_for('login'))
