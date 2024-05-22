@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Invoice</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add Invoice</h1>
+        <form method="POST" action="{{ url_for('add_invoice') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.user_id.label }}
+                {{ form.user_id(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.encrypted_invoice.label }}
+                {{ form.encrypted_invoice(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.signature.label }}
+                {{ form.signature(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.amount_due.label }}
+                {{ form.amount_due(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <a href="{{ url_for('staff_dashboard') }}">Back to Dashboard</a>
+    </div>
+</body>
+</html>

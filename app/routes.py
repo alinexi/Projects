@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request, session
 from app import app, db
 from app.models import User, Invoice, Payment
-from app.forms import TaxRecordForm, UserForm, PaymentForm
+from app.forms import TaxRecordForm, UserForm, PaymentForm,InvoiceForm
 
 @app.route('/')
 def home():
@@ -92,25 +92,38 @@ def user_dashboard():
    
 @app.route('/staff_dashboard', methods=['GET', 'POST'])
 def staff_dashboard():
-    form = TaxRecordForm()
-    if form.validate_on_submit():
-        full_name = form.full_name.data
-        tax_id = form.tax_id.data
-        address = form.address.data
-        city = form.city.data
-        state = form.state.data
-        postal_code = form.postal_code.data
-        annual_income = form.annual_income.data
-        income_sources = form.income_sources.data
-        deductions = form.deductions.data
-        deduction_details = form.deduction_details.data
-        tax_rate = form.tax_rate.data
-        calculated_tax = form.calculated_tax.data
-        # Here you can add logic to save the data to the database
-        flash('Tax record updated successfully!', 'success')
-        return redirect(url_for('staff_dashboard'))
-    return render_template('staff_dashboard.html', form=form)
+    invoices = Invoice.query.all()
+    return render_template('staff_dashboard.html', invoices=invoices)
 
+@app.route('/add_invoice', methods=['GET', 'POST'])
+def add_invoice():
+    form = InvoiceForm()
+    if form.validate_on_submit():
+        new_invoice = Invoice(
+            user_id=form.user_id.data,
+            encrypted_invoice=form.encrypted_invoice.data.encode(),
+            signature=form.signature.data.encode(),
+            amount_due=form.amount_due.data
+        )
+        db.session.add(new_invoice)
+        db.session.commit()
+        flash('Invoice added successfully!', 'success')
+        return redirect(url_for('staff_dashboard'))
+    return render_template('add_invoice.html', form=form)
+
+@app.route('/edit_invoice/<int:invoice_id>', methods=['GET', 'POST'])
+def edit_invoice(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    form = InvoiceForm(obj=invoice)
+    if form.validate_on_submit():
+        invoice.user_id = form.user_id.data
+        invoice.encrypted_invoice = form.encrypted_invoice.data.encode()
+        invoice.signature = form.signature.data.encode()
+        invoice.amount_due = form.amount_due.data
+        db.session.commit()
+        flash('Invoice updated successfully!', 'success')
+        return redirect(url_for('staff_dashboard'))
+    return render_template('edit_invoice.html', form=form, invoice_id=invoice_id)
 
 @app.route('/logout')
 def logout():
