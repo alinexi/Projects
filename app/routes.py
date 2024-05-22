@@ -1,7 +1,7 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, session
 from app import app, db
-from app.models import User
-from app.forms import TaxRecordForm, UserForm
+from app.models import User, Invoice, Payment
+from app.forms import TaxRecordForm, UserForm, PaymentForm
 
 @app.route('/')
 def home():
@@ -15,6 +15,7 @@ def login():
         role = request.form['role']
         user = User.query.filter_by(username=username, password=password, role=role).first()
         if user:
+            session['user_id'] = user.id  # Store user ID in session
             if role == 'Sysadmin':
                 return redirect(url_for('sysadmin_dashboard'))
             elif role == 'Staff':
@@ -68,6 +69,29 @@ def delete_user(user_id):
 
 @app.route('/user_dashboard', methods=['GET', 'POST'])
 def user_dashboard():
+    user_id = session.get('user_id')  # Retrieve user ID from session
+    if not user_id:
+        flash('Please log in to access this page.', 'warning')
+        return redirect(url_for('login'))
+    
+    invoices = Invoice.query.filter_by(user_id=user_id).all()
+    form = PaymentForm()
+    if form.validate_on_submit():
+        new_payment = Payment(
+            invoice_id=request.form['invoice_id'],
+            user_id=user_id,
+            amount=form.amount.data,
+            payment_details=form.payment_details.data
+        )
+        db.session.add(new_payment)
+        db.session.commit()
+        flash('Payment successful!', 'success')
+        return redirect(url_for('user_dashboard'))
+    return render_template('user_dashboard.html', form=form, invoices=invoices)
+
+   
+@app.route('/staff_dashboard', methods=['GET', 'POST'])
+def staff_dashboard():
     form = TaxRecordForm()
     if form.validate_on_submit():
         full_name = form.full_name.data
@@ -84,23 +108,9 @@ def user_dashboard():
         calculated_tax = form.calculated_tax.data
         # Here you can add logic to save the data to the database
         flash('Tax record updated successfully!', 'success')
-        return redirect(url_for('user_dashboard'))
-    return render_template('user_dashboard.html', form=form)
-
-@app.route('/staff_dashboard', methods=['GET', 'POST'])
-def staff_dashboard():
-    form = TaxRecordForm()
-    if form.validate_on_submit():
-        # Process form data and save to database
-        tax_record = TaxRecord(
-            tax_id=form.tax_id.data,
-            encrypted_record=form.encrypted_record.data
-        )
-        db.session.add(tax_record)
-        db.session.commit()
-        flash('Tax record updated successfully!', 'success')
         return redirect(url_for('staff_dashboard'))
     return render_template('staff_dashboard.html', form=form)
+
 
 @app.route('/logout')
 def logout():
