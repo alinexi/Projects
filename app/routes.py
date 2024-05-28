@@ -1,12 +1,13 @@
 from flask import render_template, redirect, url_for, flash, request, session
 from app import app, db
 from app.models import User, Invoice, Payment
-from app.forms import TaxRecordForm, UserForm, PaymentForm, InvoiceForm
+from app.forms import TaxRecordForm, UserForm, PaymentForm, InvoiceForm, SalaryForm, TaxPercentageForm
 from app.decorators import login_required
 
 @app.route('/')
 def home():
     return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -33,19 +34,26 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
-
 @app.route('/sysadmin_dashboard')
 @login_required
 def sysadmin_dashboard():
     users = User.query.all()
     return render_template('sysadmin_dashboard.html', users=users)
 
-@app.route('/staff_dashboard')
+@app.route('/staff_dashboard', methods=['GET', 'POST'])
 @login_required
 def staff_dashboard():
-    # Join User and Invoice tables to get usernames and invoice details
-    invoices = db.session.query(Invoice, User).join(User, Invoice.user_id == User.id).all()
-    return render_template('staff_dashboard.html', invoices=invoices)
+    tax_form = TaxPercentageForm()
+    if tax_form.validate_on_submit():
+        user = User.query.get(tax_form.user_id.data)
+        if user:
+            user.tax_percentage = tax_form.tax_percentage.data
+            db.session.commit()
+            flash('Tax percentage updated successfully!', 'success')
+            return redirect(url_for('staff_dashboard'))
+    users = User.query.all()
+    return render_template('staff_dashboard.html', tax_form=tax_form, users=users)
+
 @app.route('/user_dashboard', methods=['GET', 'POST'])
 @login_required
 def user_dashboard():
@@ -56,11 +64,18 @@ def user_dashboard():
 
     user = User.query.get(user_id)
     invoices = Invoice.query.filter_by(user_id=user_id).all()
-    form = PaymentForm()
-    if form.validate_on_submit():
-        payment_amount = form.amount.data
-        if payment_amount < 0:
-            flash('Payment amount must be positive. Please enter a valid amount.', 'danger')
+    payment_form = PaymentForm()
+    salary_form = SalaryForm()
+    if salary_form.validate_on_submit():
+        user.salary = salary_form.salary.data
+        db.session.commit()
+        flash('Salary updated successfully!', 'success')
+        return redirect(url_for('user_dashboard'))
+
+    if payment_form.validate_on_submit():
+        payment_amount = payment_form.amount.data
+        if payment_amount <= 0:
+            flash('Payment amount must be greater than zero. Please enter a valid amount.', 'danger')
         else:
             invoice_id = request.form['invoice_id']
             invoice = Invoice.query.get(invoice_id)
@@ -70,14 +85,13 @@ def user_dashboard():
                     invoice_id=invoice_id,
                     user_id=user_id,
                     amount=payment_amount,
-                    payment_details=form.payment_details.data
+                    payment_details=payment_form.payment_details.data
                 )
                 db.session.add(new_payment)
                 db.session.commit()
                 flash('Payment successful!', 'success')
                 return redirect(url_for('user_dashboard'))
-    return render_template('user_dashboard.html', user=user, form=form, invoices=invoices)
-
+    return render_template('user_dashboard.html', user=user, payment_form=payment_form, salary_form=salary_form, invoices=invoices)
 
 @app.route('/add_invoice', methods=['GET', 'POST'])
 @login_required
@@ -111,9 +125,7 @@ def edit_invoice(invoice_id):
         return redirect(url_for('staff_dashboard'))
     return render_template('edit_invoice.html', form=form, invoice_id=invoice_id)
 
-
 @app.route('/add_user', methods=['GET', 'POST'])
-@login_required
 def add_user():
     form = UserForm()
     if form.validate_on_submit():
@@ -127,8 +139,8 @@ def add_user():
         flash('User added successfully!', 'success')
         return redirect(url_for('sysadmin_dashboard'))
     return render_template('add_user.html', form=form)
+
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-@login_required
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
     form = UserForm(obj=user)
@@ -142,7 +154,6 @@ def edit_user(user_id):
     return render_template('edit_user.html', form=form, user_id=user_id)
 
 @app.route('/delete_user/<int:user_id>', methods=['POST'])
-@login_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)

@@ -20,6 +20,16 @@
             {% endif %}
         {% endwith %}
         
+        <!-- Salary Input -->
+        <form method="POST" action="{{ url_for('user_dashboard') }}">
+            {{ salary_form.hidden_tag() }}
+            <div class="form-group">
+                {{ salary_form.salary.label }}
+                {{ salary_form.salary(class="form-control", value=user.salary if user.salary else '') }}
+            </div>
+            <button type="submit" class="btn btn-primary">Update Salary</button>
+        </form>
+
         <!-- Display invoices -->
         <h2>Your Invoices</h2>
         <table>
@@ -40,15 +50,15 @@
                     <td>
                         <!-- Form to pay the invoice -->
                         <form method="POST" action="{{ url_for('user_dashboard') }}">
-                            {{ form.hidden_tag() }}
+                            {{ payment_form.hidden_tag() }}
                             <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
                             <div class="form-group">
-                                {{ form.amount.label }}
-                                {{ form.amount(class="form-control") }}
+                                {{ payment_form.amount.label }}
+                                {{ payment_form.amount(class="form-control") }}
                             </div>
                             <div class="form-group">
-                                {{ form.payment_details.label }}
-                                {{ form.payment_details(class="form-control") }}
+                                {{ payment_form.payment_details.label }}
+                                {{ payment_form.payment_details(class="form-control") }}
                             </div>
                             <button type="submit" class="btn btn-primary">Pay</button>
                         </form>

@@ -9,32 +9,59 @@
 <body>
     <div class="container">
         <h1>Staff Dashboard</h1>
-        <a href="{{ url_for('add_invoice') }}">Add Invoice</a>
-        <h2>Invoices</h2>
+        
+        <!-- Display flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Tax Percentage Form -->
+        <form method="POST" action="{{ url_for('staff_dashboard') }}">
+            {{ tax_form.hidden_tag() }}
+            <div class="form-group">
+                {{ tax_form.user_id.label }}
+                {{ tax_form.user_id(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ tax_form.tax_percentage.label }}
+                {{ tax_form.tax_percentage(class="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Update Tax Percentage</button>
+        </form>
+
+        <!-- Display users with their tax percentages -->
+        <h2>Users</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Invoice ID</th>
+                    <th>User ID</th>
                     <th>Username</th>
-                    <th>Amount Due</th>
-                    <th>Created At</th>
+                    <th>Tax Percentage</th>
+                    <th>Salary</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for invoice, user in invoices %}
+                {% for user in users %}
                 <tr>
-                    <td>{{ invoice.id }}</td>
+                    <td>{{ user.id }}</td>
                     <td>{{ user.username }}</td>
-                    <td>{{ invoice.amount_due }}</td>
-                    <td>{{ invoice.created_at }}</td>
+                    <td>{{ user.tax_percentage }}</td>
+                    <td>{{ user.salary }}</td>
                     <td>
-                        <a href="{{ url_for('edit_invoice', invoice_id=invoice.id) }}">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 </body>

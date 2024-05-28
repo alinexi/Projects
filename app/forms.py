@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, SubmitField, FloatField, IntegerField
 from wtforms.validators import DataRequired, NumberRange
-from app.models import User
+from app.models import User  # Add this line
 
 class TaxRecordForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired()])
@@ -25,7 +25,7 @@ class UserForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class PaymentForm(FlaskForm):
-    amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0, message='Amount must be positive')])
+    amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01, message='Amount must be greater than zero')])
     payment_details = StringField('Payment Details', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
@@ -38,4 +38,17 @@ class InvoiceForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(InvoiceForm, self).__init__(*args, **kwargs)
+        self.user_id.choices = [(user.id, user.username) for user in User.query.all()]
+
+class SalaryForm(FlaskForm):
+    salary = FloatField('Salary', validators=[DataRequired(), NumberRange(min=0, message='Salary must be positive')])
+    submit = SubmitField('Submit')
+
+class TaxPercentageForm(FlaskForm):
+    user_id = SelectField('Username', coerce=int, validators=[DataRequired()])
+    tax_percentage = FloatField('Tax Percentage', validators=[DataRequired(), NumberRange(min=0, message='Tax Percentage must be positive')])
+    submit = SubmitField('Submit')
+
+    def __init__(self, *args, **kwargs):
+        super(TaxPercentageForm, self).__init__(*args, **kwargs)
         self.user_id.choices = [(user.id, user.username) for user in User.query.all()]
