@@ -53,15 +53,14 @@
                     <td>{{ user.tax_percentage }}</td>
                     <td>{{ user.salary }}</td>
                     <td>
-                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display:inline;">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
+                        <a href="{{ url_for('user_payment_history', user_id=user.id) }}">View Payment History</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
+        <a href="{{ url_for('payment_history') }}">View All Payment History</a>
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 </body>

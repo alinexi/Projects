@@ -5,8 +5,8 @@ class User(db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     role = db.Column(db.String(50), nullable=False)
-    salary = db.Column(db.Float, nullable=True)  # Add this line
-    tax_percentage = db.Column(db.Float, nullable=True)  # Add this line
+    salary = db.Column(db.Float, nullable=True)
+    tax_percentage = db.Column(db.Float, nullable=True)
 
 class TaxRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,3 +35,5 @@ class Payment(db.Model):
     amount = db.Column(db.Float, nullable=False)
     payment_details = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    user = db.relationship('User', backref=db.backref('payments', lazy=True))
+    invoice = db.relationship('Invoice', backref=db.backref('payments', lazy=True))

@@ -34,11 +34,13 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
+
 @app.route('/sysadmin_dashboard')
 @login_required
 def sysadmin_dashboard():
     users = User.query.all()
     return render_template('sysadmin_dashboard.html', users=users)
+
 
 @app.route('/staff_dashboard', methods=['GET', 'POST'])
 @login_required
@@ -55,7 +57,6 @@ def staff_dashboard():
     users = User.query.all()
     return render_template('staff_dashboard.html', tax_form=tax_form, users=users)
 
-
 @app.route('/user_dashboard', methods=['GET', 'POST'])
 @login_required
 def user_dashboard():
@@ -66,6 +67,7 @@ def user_dashboard():
 
     user = User.query.get(user_id)
     invoices = Invoice.query.filter_by(user_id=user_id).all()
+    payments = Payment.query.filter_by(user_id=user_id).all()
     payment_form = PaymentForm()
     salary_form = SalaryForm()
     if salary_form.validate_on_submit():
@@ -94,7 +96,7 @@ def user_dashboard():
                 db.session.commit()
                 flash('Payment successful!', 'success')
                 return redirect(url_for('user_dashboard'))
-    return render_template('user_dashboard.html', user=user, payment_form=payment_form, salary_form=salary_form, invoices=invoices)
+    return render_template('user_dashboard.html', user=user, payment_form=payment_form, salary_form=salary_form, invoices=invoices, payments=payments)
 
 
 @app.route('/add_invoice', methods=['GET', 'POST'])
@@ -114,6 +116,7 @@ def add_invoice():
         return redirect(url_for('staff_dashboard'))
     return render_template('add_invoice.html', form=form)
 
+
 @app.route('/edit_invoice/<int:invoice_id>', methods=['GET', 'POST'])
 @login_required
 def edit_invoice(invoice_id):
@@ -128,6 +131,7 @@ def edit_invoice(invoice_id):
         flash('Invoice updated successfully!', 'success')
         return redirect(url_for('staff_dashboard'))
     return render_template('edit_invoice.html', form=form, invoice_id=invoice_id)
+
 
 @app.route('/add_user', methods=['GET', 'POST'])
 def add_user():
@@ -182,3 +186,40 @@ def calculate_and_update_invoices():
                 )
                 db.session.add(new_invoice)
     db.session.commit()
+
+
+@app.route('/payment_history')
+@login_required
+def payment_history():
+    if 'user_id' not in session:
+        flash('Please log in to access this page.', 'warning')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    if user.role != 'Staff':
+        flash('You do not have permission to view this page.', 'danger')
+        return redirect(url_for('user_dashboard'))
+
+    query = request.args.get('query')
+    if query:
+        payments = Payment.query.join(User).filter(
+            (User.username.contains(query)) |
+            (Payment.payment_details.contains(query))
+        ).all()
+    else:
+        payments = Payment.query.all()
+    
+    return render_template('payment_history.html', payments=payments)
+
+
+@app.route('/user_payment_history/<int:user_id>')
+@login_required
+def user_payment_history(user_id):
+    if 'user_id' not in session:
+        flash('Please log in to access this page.', 'warning')
+        return redirect(url_for('login'))
+
+    user = User.query.get(user_id)
+    payments = Payment.query.filter_by(user_id=user_id).all()
+    return render_template('user_payment_history.html', user=user, payments=payments)
