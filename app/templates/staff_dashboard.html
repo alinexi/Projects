@@ -15,17 +15,17 @@
             <thead>
                 <tr>
                     <th>Invoice ID</th>
-                    <th>User ID</th>
+                    <th>Username</th>
                     <th>Amount Due</th>
                     <th>Created At</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for invoice in invoices %}
+                {% for invoice, user in invoices %}
                 <tr>
                     <td>{{ invoice.id }}</td>
-                    <td>{{ invoice.user_id }}</td>
+                    <td>{{ user.username }}</td>
                     <td>{{ invoice.amount_due }}</td>
                     <td>{{ invoice.created_at }}</td>
                     <td>
@@ -37,14 +37,5 @@
         </table>
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
 </body>
 </html>

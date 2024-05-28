@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, SubmitField, FloatField, IntegerField
 from wtforms.validators import DataRequired
+from app.models import User
 
 class TaxRecordForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired()])
@@ -29,8 +30,12 @@ class PaymentForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class InvoiceForm(FlaskForm):
-    user_id = IntegerField('User ID', validators=[DataRequired()])
+    user_id = SelectField('Username', coerce=int, validators=[DataRequired()])
     encrypted_invoice = StringField('Encrypted Invoice', validators=[DataRequired()])
     signature = StringField('Signature', validators=[DataRequired()])
     amount_due = FloatField('Amount Due', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+    def __init__(self, *args, **kwargs):
+        super(InvoiceForm, self).__init__(*args, **kwargs)
+        self.user_id.choices = [(user.id, user.username) for user in User.query.all()]

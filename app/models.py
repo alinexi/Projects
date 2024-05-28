@@ -19,12 +19,12 @@ class Invoice(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     amount_due = db.Column(db.Float, nullable=False)
 
-class Key(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    des_key = db.Column(db.LargeBinary, nullable=False)
-    rsa_private_key = db.Column(db.LargeBinary, nullable=False)
-    rsa_public_key = db.Column(db.LargeBinary, nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+# class Key(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     des_key = db.Column(db.LargeBinary, nullable=False)
+#     rsa_private_key = db.Column(db.LargeBinary, nullable=False)
+#     rsa_public_key = db.Column(db.LargeBinary, nullable=False)
+#     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
