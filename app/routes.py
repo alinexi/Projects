@@ -49,10 +49,12 @@ def staff_dashboard():
         if user:
             user.tax_percentage = tax_form.tax_percentage.data
             db.session.commit()
+            calculate_and_update_invoices()
             flash('Tax percentage updated successfully!', 'success')
             return redirect(url_for('staff_dashboard'))
     users = User.query.all()
     return render_template('staff_dashboard.html', tax_form=tax_form, users=users)
+
 
 @app.route('/user_dashboard', methods=['GET', 'POST'])
 @login_required
@@ -69,6 +71,7 @@ def user_dashboard():
     if salary_form.validate_on_submit():
         user.salary = salary_form.salary.data
         db.session.commit()
+        calculate_and_update_invoices()
         flash('Salary updated successfully!', 'success')
         return redirect(url_for('user_dashboard'))
 
@@ -92,6 +95,7 @@ def user_dashboard():
                 flash('Payment successful!', 'success')
                 return redirect(url_for('user_dashboard'))
     return render_template('user_dashboard.html', user=user, payment_form=payment_form, salary_form=salary_form, invoices=invoices)
+
 
 @app.route('/add_invoice', methods=['GET', 'POST'])
 @login_required
@@ -160,3 +164,21 @@ def delete_user(user_id):
     db.session.commit()
     flash('User deleted successfully!', 'success')
     return redirect(url_for('sysadmin_dashboard'))
+
+def calculate_and_update_invoices():
+    users = User.query.all()
+    for user in users:
+        if user.salary is not None and user.tax_percentage is not None:
+            tax_amount = user.salary * (user.tax_percentage / 100)
+            existing_invoice = Invoice.query.filter_by(user_id=user.id).first()
+            if existing_invoice:
+                existing_invoice.amount_due = tax_amount
+            else:
+                new_invoice = Invoice(
+                    user_id=user.id,
+                    encrypted_invoice=b'',  # You can replace this with actual encrypted data
+                    signature=b'',  # You can replace this with actual signature
+                    amount_due=tax_amount
+                )
+                db.session.add(new_invoice)
+    db.session.commit()
