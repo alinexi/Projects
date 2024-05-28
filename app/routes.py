@@ -58,21 +58,24 @@ def user_dashboard():
     invoices = Invoice.query.filter_by(user_id=user_id).all()
     form = PaymentForm()
     if form.validate_on_submit():
-        invoice_id = request.form['invoice_id']
-        invoice = Invoice.query.get(invoice_id)
-        if invoice and invoice.user_id == user_id:
-            payment_amount = form.amount.data
-            invoice.amount_due -= payment_amount
-            new_payment = Payment(
-                invoice_id=invoice_id,
-                user_id=user_id,
-                amount=payment_amount,
-                payment_details=form.payment_details.data
-            )
-            db.session.add(new_payment)
-            db.session.commit()
-            flash('Payment successful!', 'success')
-            return redirect(url_for('user_dashboard'))
+        payment_amount = form.amount.data
+        if payment_amount < 0:
+            flash('Payment amount must be positive. Please enter a valid amount.', 'danger')
+        else:
+            invoice_id = request.form['invoice_id']
+            invoice = Invoice.query.get(invoice_id)
+            if invoice and invoice.user_id == user_id:
+                invoice.amount_due -= payment_amount
+                new_payment = Payment(
+                    invoice_id=invoice_id,
+                    user_id=user_id,
+                    amount=payment_amount,
+                    payment_details=form.payment_details.data
+                )
+                db.session.add(new_payment)
+                db.session.commit()
+                flash('Payment successful!', 'success')
+                return redirect(url_for('user_dashboard'))
     return render_template('user_dashboard.html', user=user, form=form, invoices=invoices)
 
 

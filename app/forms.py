@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, SubmitField, FloatField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, NumberRange
 from app.models import User
 
 class TaxRecordForm(FlaskForm):
@@ -25,7 +25,7 @@ class UserForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class PaymentForm(FlaskForm):
-    amount = FloatField('Amount', validators=[DataRequired()])
+    amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0, message='Amount must be positive')])
     payment_details = StringField('Payment Details', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
