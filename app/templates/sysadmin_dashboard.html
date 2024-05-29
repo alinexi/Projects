@@ -1,37 +1,104 @@
-<!-- app/templates/sysadmin_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sysadmin Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        h2 {
+            color: #666;
+            margin-top: 30px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        form p {
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        a {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Sysadmin Dashboard</h1>
-        <a href="{{ url_for('add_user') }}">Add User</a>
+        <h2>Create New User</h2>
+        <form method="POST" action="{{ url_for('sysadmin_dashboard') }}">
+            {{ form.hidden_tag() }}
+            <p>
+                <label for="username">Username:</label><br>
+                {{ form.username(id="username", size=32, placeholder="Enter username") }}
+            </p>
+            <p>
+                <label for="password">Password:</label><br>
+                {{ form.password(id="password", size=32, placeholder="Enter password") }}
+            </p>
+            <p>
+                <label for="role">Role:</label><br>
+                {{ form.role(id="role") }}
+            </p>
+            <p>{{ form.submit() }}</p>
+        </form>
+
+        <h2>Existing Users</h2>
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Username</th>
                     <th>Role</th>
-                    <th>Actions</th>
+                    <th>Salary</th>
+                    <th>Tax Percentage</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td>{{ user.id }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.role }}</td>
-                    <td>
-                        <a href="{{ url_for('edit_user', user_id=user.id) }}">Edit</a>
-                        <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </td>
+                    <td>{{ user.salary }}</td>
+                    <td>{{ user.tax_percentage }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

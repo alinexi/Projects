@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, SubmitField, FloatField, IntegerField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange ,Length
 from app.models import User  # Add this line
 
 class TaxRecordForm(FlaskForm):
@@ -19,11 +19,11 @@ class TaxRecordForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class UserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=150)])
     password = PasswordField('Password', validators=[DataRequired()])
-    role = SelectField('Role', choices=[('User', 'User'), ('Staff', 'Staff')], validators=[DataRequired()])
-    submit = SubmitField('Submit')
-
+    role = SelectField('Role', choices=[('Sysadmin', 'Sysadmin'), ('Staff', 'Staff'), ('User', 'User')], validators=[DataRequired()])
+    submit = SubmitField('Create User')
+    
 class PaymentForm(FlaskForm):
     amount = FloatField('Amount', validators=[DataRequired(), NumberRange(min=0.01, message='Amount must be greater than zero')])
     payment_details = StringField('Payment Details', validators=[DataRequired()])
@@ -41,13 +41,14 @@ class InvoiceForm(FlaskForm):
         self.user_id.choices = [(user.id, user.username) for user in User.query.all()]
 
 class SalaryForm(FlaskForm):
-    salary = FloatField('Salary', validators=[DataRequired(), NumberRange(min=0, message='Salary must be positive')])
-    submit = SubmitField('Submit')
+    salary = FloatField('Salary', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Set Salary')
+
 
 class TaxPercentageForm(FlaskForm):
-    user_id = SelectField('Username', coerce=int, validators=[DataRequired()])
-    tax_percentage = FloatField('Tax Percentage', validators=[DataRequired(), NumberRange(min=0, message='Tax Percentage must be positive')])
-    submit = SubmitField('Submit')
+    user_id = IntegerField('User ID', validators=[DataRequired()])
+    tax_percentage = FloatField('Tax Percentage', validators=[DataRequired(), NumberRange(min=0, max=100)])
+    submit = SubmitField('Set Tax Percentage')
 
     def __init__(self, *args, **kwargs):
         super(TaxPercentageForm, self).__init__(*args, **kwargs)

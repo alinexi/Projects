@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, session
 from app import app, db
-from app.models import User, Invoice, Payment
+from app.models import User, Invoice, Payment,DESKey
 from app.forms import TaxRecordForm, UserForm, PaymentForm, InvoiceForm, SalaryForm, TaxPercentageForm
 from app.decorators import login_required
 
@@ -14,8 +14,12 @@ def login():
         username = request.form['username']
         password = request.form['password']
         role = request.form['role']
-        user = User.query.filter_by(username=username, password=password, role=role).first()
-        if user:
+        current_key = DESKey.get_current_key()
+        if not current_key:
+            flash('DES key generation error. Please contact admin.', 'danger')
+            return redirect(url_for('login'))
+        user = User.query.filter_by(username=username, role=role).first()
+        if user and user.get_password(current_key) == password:
             session['user_id'] = user.id  # Store user ID in session
             flash('Login successful!', 'success')
             if role == 'Sysadmin':
@@ -27,7 +31,6 @@ def login():
         else:
             flash('Login Unsuccessful. Please check username, password, and role', 'danger')
     return render_template('login.html')
-
 @app.route('/logout')
 def logout():
     session.clear()
@@ -35,27 +38,64 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/sysadmin_dashboard')
+@app.route('/sysadmin_dashboard', methods=['GET', 'POST'])
 @login_required
 def sysadmin_dashboard():
+    current_key = DESKey.get_current_key()
+    form = UserForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        role = form.role.data
+        new_user = User(username=username, role=role)
+        new_user.set_password(password, current_key)
+        db.session.add(new_user)
+        db.session.commit()
+        flash(f'User {username} created successfully!', 'success')
+        return redirect(url_for('sysadmin_dashboard'))
+    
     users = User.query.all()
-    return render_template('sysadmin_dashboard.html', users=users)
-
+    for user in users:
+        user.salary = user.get_salary(current_key)
+        user.tax_percentage = user.get_tax_percentage(current_key)
+    
+    return render_template('sysadmin_dashboard.html', users=users, form=form)
 
 @app.route('/staff_dashboard', methods=['GET', 'POST'])
 @login_required
 def staff_dashboard():
+    current_key = DESKey.get_current_key()
     tax_form = TaxPercentageForm()
     if tax_form.validate_on_submit():
-        user = User.query.get(tax_form.user_id.data)
+        user_id = tax_form.user_id.data
+        tax_percentage = tax_form.tax_percentage.data
+        user = User.query.get(user_id)
         if user:
-            user.tax_percentage = tax_form.tax_percentage.data
+            user.set_tax_percentage(tax_percentage, current_key)
             db.session.commit()
-            calculate_and_update_invoices()
-            flash('Tax percentage updated successfully!', 'success')
-            return redirect(url_for('staff_dashboard'))
+            calculate_and_update_invoices()  # Update invoices after setting tax percentage
+            flash('Tax percentage updated successfully', 'success')
+        else:
+            flash('User not found', 'danger')
+        return redirect(url_for('staff_dashboard'))
+
     users = User.query.all()
-    return render_template('staff_dashboard.html', tax_form=tax_form, users=users)
+    for user in users:
+        user.salary = user.get_salary(current_key)
+        user.tax_percentage = user.get_tax_percentage(current_key)
+
+    return render_template('staff_dashboard.html', users=users, tax_form=tax_form)
+
+def calculate_and_update_invoices():
+    current_key = DESKey.get_current_key()
+    users = User.query.all()
+    for user in users:
+        salary = user.get_salary(current_key)
+        tax_percentage = user.get_tax_percentage(current_key)
+        if salary is not None and tax_percentage is not None:
+            # Perform calculation and update invoice logic here
+            pass
+
 
 @app.route('/user_dashboard', methods=['GET', 'POST'])
 @login_required
@@ -66,16 +106,22 @@ def user_dashboard():
         return redirect(url_for('login'))
 
     user = User.query.get(user_id)
+    current_key = DESKey.get_current_key()
+    user.salary = user.get_salary(current_key)
+    user.tax_percentage = user.get_tax_percentage(current_key)
     invoices = Invoice.query.filter_by(user_id=user_id).all()
     payments = Payment.query.filter_by(user_id=user_id).all()
     payment_form = PaymentForm()
     salary_form = SalaryForm()
     if salary_form.validate_on_submit():
-        user.salary = salary_form.salary.data
+        salary = salary_form.salary.data
+        user.set_salary(salary, current_key)
         db.session.commit()
-        calculate_and_update_invoices()
-        flash('Salary updated successfully!', 'success')
+        flash('Salary updated successfully', 'success')
         return redirect(url_for('user_dashboard'))
+
+    #user.salary = user.get_salary(current_key)
+    #return render_template('user_dashboard.html', user=user, salary_form=salary_form)
 
     if payment_form.validate_on_submit():
         payment_amount = payment_form.amount.data
@@ -115,6 +161,7 @@ def add_invoice():
         flash('Invoice added successfully!', 'success')
         return redirect(url_for('staff_dashboard'))
     return render_template('add_invoice.html', form=form)
+
 
 
 @app.route('/edit_invoice/<int:invoice_id>', methods=['GET', 'POST'])
@@ -211,6 +258,7 @@ def payment_history():
         payments = Payment.query.all()
     
     return render_template('payment_history.html', payments=payments)
+
 
 
 @app.route('/user_payment_history/<int:user_id>')
