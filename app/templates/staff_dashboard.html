@@ -5,92 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        /* Custom styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-
-        .alert-success {
-            background-color: #dff0d8;
-            color: #3c763d;
-        }
-
-        .alert-danger {
-            background-color: #f2dede;
-            color: #a94442;
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 10px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
@@ -104,7 +20,6 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        
         <!-- Tax Percentage Form -->
         <form method="POST" action="{{ url_for('staff_dashboard') }}">
             {{ tax_form.hidden_tag() }}
@@ -118,16 +33,18 @@
             </div>
             <button type="submit" class="btn btn-primary">Update Tax Percentage</button>
         </form>
-
+        <hr/>
+        <a href="{{url_for('add_invoice')}}" class="btn btn-primary">Add Invoice</a>
         <!-- Display users with their tax percentages -->
         <h2>Users</h2>
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>User ID</th>
                     <th>Username</th>
                     <th>Tax Percentage</th>
                     <th>Salary</th>
+                    <th>Invoice</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -138,16 +55,22 @@
                     <td>{{ user.username }}</td>
                     <td>{{ user.tax_percentage }}</td>
                     <td>{{ user.salary }}</td>
+                    <td>{{ user.salary }}</td>
                     <td>
-                        <a href="{{ url_for('user_payment_history', user_id=user.id) }}">View Payment History</a>
+                        <a href="{{ url_for('user_payment_history', user_id=user.id) }}" class="btn btn-primary">View Payment History</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <a href="{{ url_for('payment_history') }}">View All Payment History</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('payment_history') }}" class="btn btn-primary">View All Payment History</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     </div>
+
+    <!-- Add Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

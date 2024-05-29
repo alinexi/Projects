@@ -5,61 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Payment History</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        a {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #333;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
         <h1>Payment History for {{ user.username }}</h1>
         
-        <table>
-            <thead>
+        <table class="table">
+            <thead class="thead-dark">
                 <tr>
                     <th>Payment ID</th>
                     <th>Invoice ID</th>
@@ -81,7 +34,10 @@
             </tbody>
         </table>
 
-        <a href="{{ url_for('staff_dashboard') }}">Back to Dashboard</a>
+        <a href="{{ url_for('staff_dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
