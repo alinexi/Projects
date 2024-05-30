@@ -1,2 +1,5 @@
 myenv
 venv
+app/__pycache__
+private.pem
+public.pem
