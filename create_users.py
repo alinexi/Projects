@@ -5,13 +5,13 @@ from app.models import User
 def create_users():
     with app.app_context():
         # Create Sysadmin user
-        sysadmin = User(username='sysadmin', password='sysadmin123', role='Sysadmin')
+        sysadmin = User(username='sysadmin', password='123', role='Sysadmin')
         
         # Create Staff user
-        staff = User(username='staff', password='staff123', role='Staff')
+        staff = User(username='staff', password='123', role='Staff')
         
         # Create regular User
-        user = User(username='user', password='user123', role='User')
+        user = User(username='user', password='123', role='User')
 
         # Add users to the session and commit to the database
         db.session.add(sysadmin)

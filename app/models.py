@@ -7,12 +7,14 @@ class User(db.Model):
     role = db.Column(db.String(50), nullable=False)
     salary = db.Column(db.Float, nullable=True)
     tax_percentage = db.Column(db.Float, nullable=True)
+    salary_invoices = db.relationship('SalaryInvoice', backref='user', lazy=True)
+
 
 class TaxRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     encrypted_record = db.Column(db.LargeBinary, nullable=False)
-
+    
 class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -29,6 +31,7 @@ class Key(db.Model):
     rsa_public_key = db.Column(db.LargeBinary, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoice.id'), nullable=False)
@@ -38,3 +41,12 @@ class Payment(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     user = db.relationship('User', backref=db.backref('payments', lazy=True))
     invoice = db.relationship('Invoice', backref=db.backref('payments', lazy=True))
+
+class SalaryInvoice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    amount_due = db.Column(db.Float, nullable=False)
+    encrypted_amount_due = db.Column(db.LargeBinary, nullable=False)
+    amount_signature = db.Column(db.LargeBinary, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+

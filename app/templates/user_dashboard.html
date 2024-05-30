@@ -4,103 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Add Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Include Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome, {{ user.username }}!</h1>
-        <p>This is the user dashboard.</p>
-        
-        <!-- Display flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <!-- Salary Input -->
+    <div class="container mt-5">
+        <h1>User Dashboard</h1>
+        <p>Welcome, {{ user.username }}</p>
+
+        <!-- Logout button -->
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+
+        <!-- Display the calculated tax amount if available -->
+        {% if tax_amount is not none %}
+            <div class="alert alert-info mt-3">
+                <strong>Calculated Tax Amount:</strong> {{ tax_amount }}
+            </div>
+        {% endif %}
+
+        <!-- Form to update salary -->
+        <h2>Update Salary</h2>
         <form method="POST" action="{{ url_for('user_dashboard') }}">
             {{ salary_form.hidden_tag() }}
             <div class="form-group">
                 {{ salary_form.salary.label }}
-                {{ salary_form.salary(class="form-control", value=user.salary if user.salary else '') }}
+                {{ salary_form.salary(class_='form-control') }}
             </div>
-            <button type="submit" class="btn btn-primary">Update Salary</button>
+            <div class="form-group">
+                {{ salary_form.submit(class_='btn btn-primary') }}
+            </div>
         </form>
 
-        <!-- Display invoices -->
-        <h2>Your Invoices</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Invoice ID</th>
-                    <th>Amount Due</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for invoice in invoices %}
-                <tr>
-                    <td>{{ invoice.id }}</td>
-                    <td>{{ invoice.amount_due }}</td>
-                    <td>{{ invoice.created_at }}</td>
-                    <td>
-                        <!-- Form to pay the invoice -->
-                        <form method="POST" action="{{ url_for('user_dashboard') }}">
-                            {{ payment_form.hidden_tag() }}
-                            <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
-                            <div class="form-group">
-                                {{ payment_form.amount.label }}
-                                {{ payment_form.amount(class="form-control") }}
-                            </div>
-                            <div class="form-group">
-                                {{ payment_form.payment_details.label }}
-                                {{ payment_form.payment_details(class="form-control") }}
-                            </div>
-                            <button type="submit" class="btn btn-primary">Pay</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- List of invoices -->
+        <h2>Invoices</h2>
+        <ul class="list-group">
+            {% for invoice in invoices %}
+                <li class="list-group-item">
+                    <strong>Invoice:</strong> {{ invoice.invoice }}<br>
+                    <strong>Amount Due:</strong> {{ invoice.amount_due }}
+                </li>
+            {% endfor %}
+        </ul>
 
-        <!-- Display payment history -->
-        <h2>Your Payment History</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Payment ID</th>
-                    <th>Invoice ID</th>
-                    <th>Amount</th>
-                    <th>Payment Details</th>
-                    <th>Created At</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for payment in payments %}
-                <tr>
-                    <td>{{ payment.id }}</td>
-                    <td>{{ payment.invoice_id }}</td>
-                    <td>{{ payment.amount }}</td>
-                    <td>{{ payment.payment_details }}</td>
-                    <td>{{ payment.created_at }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- List of salary invoices -->
+        <h2>Salary Invoices</h2>
+        <ul class="list-group">
+            {% for invoice in salary_invoices %}
+                <li class="list-group-item">
+                    <strong>Invoice:</strong> Your salary tax<br>
+                    <strong>Amount Due:</strong> {{ invoice.amount_due }}
+                </li>
+            {% endfor %}
+        </ul>
 
-        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        <!-- Form to make a payment -->
+        <h2>Make a Payment</h2>
+        <form method="POST" action="{{ url_for('user_dashboard') }}">
+            {{ payment_form.hidden_tag() }}
+            <div class="form-group">
+                <label for="invoice_id">Amount Due</label>
+                <select id="invoice_id" name="invoice_id" class="form-control" required>
+                    {% for invoice in invoices %}
+                        <option value="{{ invoice.id }}">{{ invoice.amount_due }}</option>
+                    {% endfor %}
+                    {% for invoice in salary_invoices %}
+                        <option value="{{ invoice.id }}">{{ invoice.amount_due }} (Your salary tax)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                {{ payment_form.submit(class_='btn btn-primary') }}
+            </div>
+        </form>
+
+        <!-- List of payments -->
+        <h2>Payments</h2>
+        <ul class="list-group">
+            {% for payment in payments %}
+                <li class="list-group-item">
+                    <strong>Amount:</strong> {{ payment.amount }}<br>
+                    <strong>Payment Details:</strong> {{ payment.payment_details }}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 
-    <!-- Add Bootstrap JS -->
+    <!-- Include Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
